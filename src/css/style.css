@@ -1,0 +1,688 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background-color: #95c763;
+    color: #333;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+main {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.upload-section {
+    text-align: center;
+    padding: 40px 0;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.upload-section h2 {
+    margin-bottom: 20px;
+}
+
+.upload-section input {
+    margin: 20px 0;
+}
+
+.database-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.database-upload {
+    margin-top: 10px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+    background-color: #f9f9f9;
+}
+
+.database-upload h3 {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.start-button {
+    margin-top: 20px;
+    padding: 15px 30px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.start-button:hover {
+    background-color: #3e8e41;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.game-section {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    max-width: 600px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 20px;
+    position: absolute;
+    top: 20px;
+    z-index: 100;
+}
+
+/* 添加喇叭按钮样式 */
+.speaker-button {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    transition: all 0.3s ease;
+}
+
+.speaker-button:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+.speaker-button svg {
+    color: white;
+}
+
+.speaker-button.active {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.game-title {
+    position: absolute;
+    top: 80px;
+    font-size: 38px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+}
+
+.banana-container {
+    position: relative;
+    width: 80%;
+    max-width: 800px;
+    height: 0;
+    padding-bottom: 40%; /* 使用padding-bottom创建纵横比 */
+    margin: 20px auto;
+    background-image: url('../img/banana.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    overflow: visible;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 确保香蕉内部有足够的空间显示单词 */
+.banana-container::before {
+    content: '';
+    display: block;
+    padding-top: 50%;
+}
+
+.banana-top, .banana-bottom {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url('../img/banana.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    top: 0;
+    left: 0;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    opacity: 0;
+}
+
+.banana-top {
+    clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+}
+
+.banana-bottom {
+    clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+}
+
+.split-active .banana-top {
+    opacity: 1;
+    transform: translateX(-20px) rotate(-2deg);
+}
+
+.split-active .banana-bottom {
+    opacity: 1;
+    transform: translateX(20px) rotate(2deg);
+}
+
+.split-active.banana-container {
+    /* 移除这一行，保留背景图片 */
+    /* background-image: none; */
+}
+
+/* 新增的切分效果样式 */
+.split-effect {
+    position: absolute;
+    width: 5px;
+    height: 10px;
+    background-color: #FFFFFF;
+    transform: translate(-50%, -50%); /* 修改为居中定位 */
+    z-index: 30;
+    box-shadow: 
+        0 0 10px 4px rgba(255, 255, 255, 0.8),
+        0 0 20px 8px rgba(192, 192, 192, 0.7),
+        0 0 30px 15px rgba(211, 211, 211, 0.6);
+    opacity: 0;
+}
+
+.split-effect:after {
+    content: '';
+    position: relative;
+    width: 100%;
+    /* height: 100%; */
+    background-color: rgba(255, 255, 255, 0.3);
+    filter: blur(5px);
+}
+
+.letter-container {
+    position: absolute;
+    width: 70%;
+    display: flex;
+    justify-content: center;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    transition: opacity 0.3s;
+}
+
+/* 确保字母在香蕉的中央位置，但稍微下移 */
+@media (max-width: 768px) {
+    .letter-container {
+        top: 60%;
+    }
+}
+
+.letter {
+    display: inline-block;
+    color: #000;
+    font-size: 56px; /* 从4vw改为固定像素值 */
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    margin: 0 5px; /* 从0.3vw改为固定像素值 */
+    transition: all 0.2s;
+    z-index: 5;
+}
+
+.letter.vowel {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.letter-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.syllable-break {
+    width: 2px;
+    height: 60px; /* 从8vw改为固定像素值 */
+    cursor: pointer;
+    position: relative;
+    z-index: 20;
+    background-color: rgba(200, 200, 200, 0);
+    border-radius: 2px;
+    margin: 0 0px; /* 从0.8vw改为固定像素值 */
+    transition: all 0.2s ease;
+    opacity: 0;
+}
+
+.syllable-break:hover, 
+.syllable-break.hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.7);
+    animation: pulseHighlight 1s infinite;
+    width: 3px;
+    opacity: 1;
+}
+
+@keyframes pulseHighlight {
+    0% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7); }
+    50% { box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.9); }
+    100% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7); }
+}
+
+.syllable-break.active {
+    background-color: rgba(76, 175, 80, 0.8);
+    box-shadow: 0 0 10px 2px rgba(76, 175, 80, 0.5);
+}
+
+.syllable-break.active::before {
+    display: none;
+}
+
+.syllable-break .click-area {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+}
+
+.monkey {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    background-image: url('../img/monkey.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    transition: all 0.5s ease;
+}
+
+.monkey.behind {
+    left: 50%;
+    top: 25%;
+    transform: translate(-50%, -50%) scale(0.2);
+    filter: brightness(0.8);
+    z-index: 1;
+}
+
+.monkey.slicing {
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.5);
+    z-index: 20;
+}
+
+/* 添加猴子旋转动画 */
+.monkey.forward-spin {
+    animation: spinForward 1.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    z-index: 30;
+}
+
+.monkey.backward-spin {
+    animation: spinBackward 1.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+@keyframes spinForward {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+        filter: brightness(0.8);
+        z-index: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5) rotate(360deg);
+        filter: brightness(1);
+        z-index: 30;
+    }
+}
+
+@keyframes spinBackward {
+    0% {
+        transform: translate(-50%, -50%) scale(1.5) rotate(0deg);
+        z-index: 30;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.2) rotate(-360deg);
+        filter: brightness(0.8);
+        z-index: 1;
+    }
+}
+
+.monkey.jump {
+    /* 移除跳跃动画 */
+}
+
+.monkey-hand {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-color: transparent;
+    border-right: 6px solid #8B4513;
+    transform: rotate(45deg);
+    top: 60%;
+    right: 10px;
+    opacity: 0;
+}
+
+.monkey.slicing .monkey-hand {
+    opacity: 1;
+}
+
+.slash-effect {
+    position: absolute;
+    width: 5px;
+    height: 10px;
+    background-color: #FFFFFF;
+    transform: translate(-50%, -50%); /* 修改为居中定位 */
+    z-index: 30;
+    box-shadow: 
+        0 0 10px 4px rgba(255, 255, 255, 0.8),
+        0 0 20px 8px rgba(192, 192, 192, 0.7),
+        0 0 30px 15px rgba(211, 211, 211, 0.6);
+    opacity: 0;
+}
+
+.slash-effect.active {
+    /* animation: slashAnim 0.4s forwards; */
+}
+
+@keyframes slashAnim {
+    0% { height: 0; opacity: 0; }
+    10% { opacity: 1; }
+    50% { 
+        height: 16vw; /* 使用字母高度的2倍 */
+        opacity: 1; 
+        box-shadow: 
+            0 0 30px 15px rgba(255, 255, 255, 0.9), 
+            0 0 60px 30px rgba(192, 192, 192, 0.8);
+    }
+    80% { 
+        opacity: 0.8; 
+        box-shadow: 
+            0 0 40px 20px rgba(255, 255, 255, 0.7), 
+            0 0 80px 40px rgba(211, 211, 211, 0.6);
+    }
+    100% { opacity: 1; } /* 修改这里，让它保持可见 */
+}
+
+.split-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #FFFFFF;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 5px 2px rgba(192, 192, 192, 0.7);
+}
+
+.particle.active {
+    animation: particleFly 1s forwards;
+}
+
+@keyframes particleFly {
+    0% { transform: translate(0, 0) scale(1); opacity: 0; }
+    10% { opacity: 1; transform: scale(1.5); }
+    50% { transform: translate(calc(var(--tx) * 0.5), calc(var(--ty) * 0.5)) scale(2); opacity: 0.8; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0.5); opacity: 0; }
+}
+
+.feedback {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 600px;
+    z-index: 100;
+}
+
+.feedback.success {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+
+.feedback.error {
+    background-color: #f2dede;
+    color: #a94442;
+}
+
+.feedback.info {
+    background-color: #d9edf7;
+    color: #31708f;
+}
+
+.alternate-controls {
+    position: absolute;
+    bottom: 140px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 30;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 80%;
+}
+
+.alternate-controls button {
+    padding: 10px 15px;
+    background-color: rgba(76, 175, 80, 0.8);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.alternate-controls button:hover {
+    background-color: rgba(76, 175, 80, 1);
+    transform: translateY(-2px);
+}
+
+.alternate-controls button.active {
+    background-color: #2196F3;
+}
+
+/* 添加错误抖动动画 */
+@keyframes errorShake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+.syllable-break.error-shake {
+    animation: errorShake 0.4s forwards;
+    background-color: rgba(255, 0, 0, 0.4);
+}
+
+/* 添加悬停状态 */
+.syllable-break.hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.7);
+    animation: pulseHighlight 1s infinite;
+    width: 3px;
+}
+
+@keyframes pulseHighlight {
+    0% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7); }
+    50% { box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.9); }
+    100% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7); }
+}
+
+/* 添加新样式，用于控制切分效果的持久性 */
+.split-effect.persistent {
+    opacity: 1;
+    height: 120px; /* 从16vw改为固定像素值 */
+    box-shadow: 
+        0 0 15px 5px rgba(255, 255, 255, 0.8), 
+        0 0 30px 10px rgba(192, 192, 192, 0.7);
+}
+
+/* 添加设置按钮样式 */
+.settings-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.settings-button:hover {
+    transform: rotate(30deg);
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.settings-button svg {
+    color: white;
+    width: 28px;
+    height: 28px;
+}
+
+/* 设置面板样式 */
+.settings-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 350px;
+    height: 100vh;
+    background-color: white;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    transition: right 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.settings-panel.open {
+    right: 0;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.settings-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #666;
+}
+
+.close-button:hover {
+    color: #000;
+}
+
+.settings-section {
+    margin-bottom: 30px;
+}
+
+.settings-section h3 {
+    margin-bottom: 15px;
+    color: #444;
+}
+
+.image-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-option {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.image-option:hover {
+    transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.image-option.selected {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+}
+
+.image-option img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+} 
