@@ -1,22 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="styles.css" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PakePlus App</title>
-        <script type="module" src="/main.js" defer></script>
-    </head>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语音节游戏</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* 删除响应式布局样式 */
+        
+        /* 确保单词在香蕉内部的额外样式 */
+        .banana-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .letter-container {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        /* 确保字母在香蕉中间 */
+        .game-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div x-data="wordGame">
+        <!-- 添加设置按钮 -->
+        <div class="settings-button" @click="toggleSettings">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </div>
+        
+        <!-- 设置面板 -->
+        <div class="settings-panel" :class="{'open': settingsOpen}">
+            <div class="settings-header">
+                <h2>游戏设置</h2>
+                <button class="close-button" @click="toggleSettings">&times;</button>
+            </div>
+            
+            <div class="settings-content">
+                <div class="settings-section" style="display: none;">
+                    <h3>猴子形象</h3>
+                    <div class="image-selector" x-ref="monkeySelector">
+                        <template x-for="(image, index) in monkeyImages" :key="index">
+                            <div class="image-option" 
+                                 :class="{'selected': selectedMonkey === image}"
+                                 @click="selectMonkey(image)">
+                                <img :src="'img/monkeys/' + image" :alt="'猴子形象 ' + (index + 1)">
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                
+                <div class="settings-section" style="display: none;">
+                    <h3>香蕉图片</h3>
+                    <div class="image-selector" x-ref="bananaSelector">
+                        <template x-for="(image, index) in bananaImages" :key="index">
+                            <div class="image-option" 
+                                 :class="{'selected': selectedBanana === image}"
+                                 @click="selectBanana(image)">
+                                <img :src="'img/bananas/' + image" :alt="'香蕉图片 ' + (index + 1)">
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>背景图片</h3>
+                    <div class="image-selector" x-ref="backgroundSelector">
+                        <template x-for="(image, index) in backgroundImages" :key="index">
+                            <div class="image-option" 
+                                 :class="{'selected': selectedBackground === image}"
+                                 @click="selectBackground(image)">
+                                <img :src="'img/backgrounds/' + image" :alt="'背景图片 ' + (index + 1)">
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <main>
+            <div x-show="!wordsLoaded" class="upload-section">
+                <h2>选择单词来源</h2>
+                <div class="database-section">
+                    <div class="database-upload">
+                        <h3>上传自定义音节数据库</h3>
+                        <input type="file" x-on:change="loadCustomDatabase" accept=".json">
+                        <p>支持JSON格式，结构需与默认数据库一致</p>
+                        <button x-on:click="startGame" class="start-button">开始游戏</button>
+                    </div>
+                </div>
+            </div>
 
-    <body>
-        <main class="container">
-            <h1>Welcome to PakePlus</h1>
+            <div x-show="wordsLoaded" class="game-section">
+                <div class="stats">
+                    <div>得分: <span x-text="score"></span></div>
+                    <!-- 添加喇叭按钮 -->
+                    <div class="speaker-button" @click="speakCurrentWord">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                        </svg>
+                    </div>
+                    <div>剩余单词: <span x-text="remainingWords"></span></div>
+                </div>
+                <!-- <h2 class="game-title">split the word</h2> -->
 
-            <form class="row" id="greet-form">
-                <input id="greet-input" placeholder="Enter a name..." />
-                <button type="submit">Greet</button>
-            </form>
-            <p id="greet-msg"></p>
+                <div class="banana-container" :class="{'split-active': showSplitEffect}" :style="bananaStyle">
+                    <!-- 猴子元素 -->
+                    <div class="monkey" :style="monkeyStyle">
+                        <div class="monkey-hand"></div>
+                    </div>
+                    
+                    <!-- 切分效果 -->
+                    <div class="banana-top" :style="bananaTopStyle"></div>
+                    <div class="banana-bottom" :style="bananaBottomStyle"></div>
+                    <div class="slash-effect" :class="{'active': showSplitEffect}"></div>
+                    
+                    <!-- 粒子效果 -->
+                    <div class="split-particles" id="particles"></div>
+                    
+                    <!-- 切分效果容器 - 新增 -->
+                    <div class="split-effects-container" id="split-effects-container"></div>
+                    
+                    <div class="letter-container">
+                        <template x-for="(letter, index) in wordLetters" :key="index">
+                            <div class="letter-group">
+                                <div 
+                                    class="letter" 
+                                    :class="{ 'vowel': isVowel(letter) }">
+                                    <span x-text="letter"></span>
+                                </div>
+                                
+                                <!-- 只在字母之间显示切分点 -->
+                                <button 
+                                    x-show="index < wordLetters.length - 1"
+                                    class="syllable-break" 
+                                    :class="{ 'active': syllableBreaks.includes(index) }"
+                                    @click="toggleSyllableBreak(index)"
+                                    type="button">
+                                    <span class="click-area"></span>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- 备用切分控制 -->
+                    <div class="alternate-controls" style="display: none;">
+                        <template x-for="(letter, index) in wordLetters" :key="index">
+                            <button 
+                                x-show="index < wordLetters.length - 1"
+                                :class="{ 'active': syllableBreaks.includes(index) }"
+                                @click="toggleSyllableBreak(index)"
+                                type="button">
+                                在 <span x-text="letter"></span> 后切分
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div x-show="feedback" class="feedback" :class="feedbackType">
+                    <p x-text="feedback"></p>
+                </div>
+            </div>
         </main>
-    </body>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="debug.js"></script>
+</body>
 </html>
